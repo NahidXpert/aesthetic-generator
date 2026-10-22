@@ -80,9 +80,12 @@
 
   function randomItem(items) { return items[Math.floor(Math.random() * items.length)]; }
   function normalizeHex(hex) { return /^#[0-9a-f]{6}$/i.test(hex) ? hex.toUpperCase() : "#FFFFFF"; }
-  function getPalette(preset) {
+  function getPalette(preset, currentPalette = state.palette) {
     const options = paletteSets[preset] || paletteSets.Surprise;
-    return [...randomItem(options)];
+    // Prefer a different palette on every regeneration so a click never appears to do nothing.
+    const currentKey = Array.isArray(currentPalette) ? currentPalette.map(normalizeHex).join(",") : "";
+    const alternatives = options.filter(option => option.map(normalizeHex).join(",") !== currentKey);
+    return [...randomItem(alternatives.length ? alternatives : options)];
   }
   function pickFonts() {
     let headingCandidates = fonts.filter(f => f.role === "Heading");
@@ -93,7 +96,7 @@
     return {heading, body};
   }
   function generateColors() {
-    const next = getPalette(state.preset);
+    const next = getPalette(state.preset, state.palette);
     state.palette = next.map((color, i) => state.lockedColors.has(i) && state.palette[i] ? state.palette[i] : color);
     renderPalette();
     updatePreview();
@@ -377,13 +380,21 @@
     toast(`${preset === "Surprise" ? "Surprise me" : preset} direction selected.`, "success");
   }
   function navigate(view) {
+    const viewIds = { generate: "generator-view", favorites: "favorites-view", about: "about-view" };
+    if (!Object.prototype.hasOwnProperty.call(viewIds, view)) return;
     state.currentView = view;
-    ["generate","favorites","about"].forEach(name => $(`#${name}-view`).classList.toggle("hidden", name !== view));
-    $("#breadcrumb-current").textContent = view === "generate" ? "Generate" : view === "favorites" ? "Favorites" : "About";
+    Object.entries(viewIds).forEach(([name, id]) => {
+      const section = document.getElementById(id);
+      if (section) section.classList.toggle("hidden", name !== view);
+    });
+    const breadcrumb = $("#breadcrumb-current");
+    if (breadcrumb) breadcrumb.textContent = view === "generate" ? "Generate" : view === "favorites" ? "Favorites" : "About";
     $$(".nav-item[data-nav]").forEach(button => button.classList.toggle("active", button.dataset.nav === view));
     if (view === "favorites") renderFavorites();
-    $("#sidebar").classList.remove("open");
-    $("#mobile-menu").setAttribute("aria-expanded", "false");
+    const sidebar = $("#sidebar");
+    if (sidebar) sidebar.classList.remove("open");
+    const mobileMenu = $("#mobile-menu");
+    if (mobileMenu) mobileMenu.setAttribute("aria-expanded", "false");
     window.scrollTo({top:0,behavior:"smooth"});
   }
   function setDevice(device) {
@@ -411,7 +422,8 @@
     state.favorites = loadFavorites();
     state.palette = getPalette(state.preset);
     const initialFonts = pickFonts(); state.headingFont = initialFonts.heading; state.bodyFont = initialFonts.body;
-    renderPalette(); renderFonts(); updatePreview(); updateContrast(); updateLockButtons(); updateSaveButton(); persistFavorites();
+    renderPalette(); renderFonts(); updatePreview(); updateContrast(); updateLockButtons(); updateSaveButton();
+    $("#favorite-count").textContent = String(state.favorites.length);
 
     $("#generate-all").addEventListener("click", generateAll);
     $("#regenerate-colors").addEventListener("click", () => { generateColors(); toast("Color palette regenerated.", "success"); });
@@ -432,7 +444,6 @@
     $("#copy-css").addEventListener("click", () => copyText(cssExport(), "CSS variables copied"));
     $("#download-css").addEventListener("click", downloadCss);
     $("#help-button").addEventListener("click", () => $("#help-dialog").showModal());
-    $("#tip-generate").addEventListener("click", () => { navigate("generate"); generateAll(); });
     $("#open-preview").addEventListener("click", () => {
       const blob = new Blob([`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Aesthetic preview</title><link href="https://fonts.googleapis.com/css2?family=${encodeURIComponent(state.headingFont.name).replace(/%20/g,"+")}&family=${encodeURIComponent(state.bodyFont.name).replace(/%20/g,"+")}&display=swap" rel="stylesheet"><style>:root{--p0:${state.palette[0]};--p1:${state.palette[1]};--p2:${state.palette[2]};--p3:${state.palette[3]};--p4:${state.palette[4]};--p5:${state.palette[5]}}body{margin:0;background:var(--p0);color:var(--p5);font-family:'${state.bodyFont.name}',Arial,sans-serif}main{padding:12vh 10vw}h1{font-family:'${state.headingFont.name}',Georgia,serif;font-size:clamp(3rem,8vw,7rem);font-weight:500;line-height:1;margin:1rem 0}h1 em{color:var(--p2)}p{max-width:35rem;line-height:1.8}button{background:var(--p5);color:var(--p0);border:0;border-radius:6px;padding:1rem 1.4rem;font:inherit}.swatches{display:flex;margin-top:4rem}.swatches i{height:70px;flex:1;background:var(--p0)}${state.palette.map((c,i)=>`.swatches i:nth-child(${i+1}){background:${c}}`).join("")}</style></head><body><main><small>INDEPENDENT CREATIVE STUDIO</small><h1>Ideas that<br><em>feel like</em> something.</h1><p>We build thoughtful digital experiences for brands with something to say.</p><button>Explore our work ↗</button><div class="swatches">${state.palette.map(() => "<i></i>").join("")}</div></main></body></html>`], {type:"text/html"});
       const url = URL.createObjectURL(blob); window.open(url, "_blank", "noopener"); window.setTimeout(() => URL.revokeObjectURL(url), 60000);
