@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f9fc">
+  <meta name="description" content="Discover beautiful color palettes and font pairings. Preview, customize, save, and export your next aesthetic.">
+  <title>Aesthetic — Random Aesthetic Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="Aesthetic home" data-nav="generate">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span>Aesthetic<span class="brand-period">.</span></span>
+      </a>
+      <div class="side-label">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-nav="generate"><span class="nav-icon">✳</span> Generate <kbd>G</kbd></button>
+        <button class="nav-item" data-nav="favorites"><span class="nav-icon">♡</span> Favorites <span class="nav-count" id="favorite-count">0</span></button>
+      </nav>
+      <div class="side-label preset-label">QUICK PRESETS</div>
+      <nav class="preset-nav" aria-label="Aesthetic presets">
+        <button class="preset-link" data-preset="Minimal"><span class="preset-dot minimal-dot"></span> Minimal</button>
+        <button class="preset-link" data-preset="Pastel"><span class="preset-dot pastel-dot"></span> Pastel</button>
+        <button class="preset-link" data-preset="Retro"><span class="preset-dot retro-dot"></span> Retro</button>
+        <button class="preset-link" data-preset="Dark"><span class="preset-dot dark-dot"></span> Dark</button>
+        <button class="preset-link" data-preset="Luxury"><span class="preset-dot luxury-dot"></span> Luxury</button>
+        <button class="preset-link" data-preset="Nature"><span class="preset-dot nature-dot"></span> Nature</button>
+        <button class="preset-link" data-preset="Futuristic"><span class="preset-dot future-dot"></span> Futuristic</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="tip-card">
+          <span class="tip-icon">✦</span>
+          <p><strong>A little design magic</strong><br>Lock what you love. Regenerate the rest.</p>
+          <button id="tip-generate" class="text-action">Try it now <span>↗</span></button>
+        </div>
+        <button class="nav-item about-link" data-nav="about"><span class="nav-icon">ⓘ</span> About Aesthetic</button>
+        <div class="sidebar-foot"><span class="status-dot"></span> Made for curious creators</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu icon-button" id="mobile-menu" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <div class="breadcrumb"><span>Workspace</span><span class="crumb-slash">/</span><strong id="breadcrumb-current">Generate</strong></div>
+        <div class="topbar-actions">
+          <span class="saved-indicator"><span class="status-dot"></span> Autosaves favorites</span>
+          <button class="icon-button" id="help-button" aria-label="How to use Aesthetic" title="How to use">?</button>
+        </div>
+      </header>
+
+      <section id="generator-view" class="view">
+        <div class="intro-row">
+          <div>
+            <div class="eyebrow"><span class="eyebrow-line"></span> YOUR CREATIVE STARTING POINT</div>
+            <h1>Discover your next<br><em>aesthetic</em> in one click<span class="heading-dot">.</span></h1>
+            <p class="intro-copy">Color meets type. Find a combination that feels just right, then make it yours.</p>
+          </div>
+          <button class="primary-button generate-main" id="generate-all"><span>✳</span> Generate aesthetic <kbd>Space</kbd></button>
+        </div>
+
+        <div class="workspace-grid">
+          <div class="generator-column">
+            <section class="panel palette-panel" aria-labelledby="palette-heading">
+              <div class="panel-heading">
+                <div class="section-title-wrap">
+                  <span class="section-number">01</span>
+                  <div><h2 id="palette-heading">Color palette</h2><p>Six colors, one cohesive feeling.</p></div>
+                </div>
+                <div class="panel-actions">
+                  <button class="icon-button small" id="lock-palette" aria-label="Lock all colors" title="Lock all colors">⌑</button>
+                  <button class="icon-button small" id="regenerate-colors" aria-label="Regenerate colors" title="Regenerate colors">↻</button>
+                </div>
+              </div>
+              <div class="palette-grid" id="palette-grid" aria-label="Generated color palette"></div>
+              <div class="palette-footer">
+                <span class="hint"><kbd>Click</kbd> a color to copy HEX <span class="hint-separator">·</span> <kbd>Lock</kbd> to keep it</span>
+                <button class="subtle-button" id="copy-palette">▢ Copy all HEX</button>
+              </div>
+              <p class="contrast-note" id="contrast-note" role="status">Checking text contrast…</p>
+            </section>
+
+            <section class="panel font-panel" aria-labelledby="font-heading">
+              <div class="panel-heading">
+                <div class="section-title-wrap">
+                  <span class="section-number">02</span>
+                  <div><h2 id="font-heading">Font pairing</h2><p>A heading font and a body font in harmony.</p></div>
+                </div>
+                <div class="panel-actions">
+                  <button class="icon-button small" id="lock-fonts" aria-label="Lock both fonts" title="Lock both fonts">⌑</button>
+                  <button class="icon-button small" id="regenerate-fonts" aria-label="Regenerate fonts" title="Regenerate fonts">↻</button>
+                </div>
+              </div>
+              <div class="font-pairing" id="font-pairing"></div>
+              <div class="font-footer"><span class="hint">Type is the voice of your design.</span><button class="subtle-button" id="copy-fonts">▢ Copy font names</button></div>
+            </section>
+
+            <section class="panel preset-panel" aria-labelledby="preset-heading">
+              <div class="panel-heading compact-heading">
+                <div class="section-title-wrap"><span class="section-number">03</span><div><h2 id="preset-heading">Set a direction</h2><p>Choose a mood to guide your next generation.</p></div></div>
+              </div>
+              <div class="preset-chips" id="preset-chips">
+                <button class="preset-chip active" data-preset="Surprise">✦ Surprise me</button>
+                <button class="preset-chip" data-preset="Minimal">Minimal</button>
+                <button class="preset-chip" data-preset="Pastel">Pastel</button>
+                <button class="preset-chip" data-preset="Retro">Retro</button>
+                <button class="preset-chip" data-preset="Dark">Dark</button>
+                <button class="preset-chip" data-preset="Luxury">Luxury</button>
+                <button class="preset-chip" data-preset="Nature">Nature</button>
+                <button class="preset-chip" data-preset="Futuristic">Futuristic</button>
+              </div>
+            </section>
+
+            <div class="export-row">
+              <button class="secondary-button" id="save-favorite"><span id="favorite-heart">♡</span> Save to favorites</button>
+              <button class="secondary-button" id="export-css">↓ Export CSS</button>
+              <span class="export-spacer"></span>
+              <span class="keyboard-hint"><kbd>Space</kbd> Generate <span>·</span> <kbd>⌘/Ctrl</kbd> + <kbd>S</kbd> Save</span>
+            </div>
+          </div>
+
+          <aside class="preview-column">
+            <section class="preview-panel">
+              <div class="preview-top">
+                <div><span class="preview-kicker">LIVE PREVIEW</span><h2>Your aesthetic, in action</h2></div>
+                <div class="device-switch" role="group" aria-label="Preview size">
+                  <button class="device-button active" data-device="desktop" aria-label="Desktop preview" title="Desktop">▰</button>
+                  <button class="device-button" data-device="tablet" aria-label="Tablet preview" title="Tablet">▯</button>
+                  <button class="device-button" data-device="mobile" aria-label="Mobile preview" title="Mobile">▯</button>
+                </div>
+              </div>
+              <div class="preview-stage">
+                <div class="browser-frame" id="browser-frame">
+                  <div class="browser-bar"><div class="browser-dots"><i></i><i></i><i></i></div><div class="browser-address">your-next-project.design</div><span class="browser-more">•••</span></div>
+                  <div class="site-preview" id="site-preview">
+                    <nav class="demo-nav"><div class="demo-brand"><span class="demo-logo">✳</span> studio north</div><div class="demo-links"><span>Work</span><span>About</span><span>Journal</span></div><button class="demo-nav-cta">Let's talk ↗</button></nav>
+                    <section class="demo-hero">
+                      <div class="demo-eyebrow"><span class="demo-eyebrow-dot"></span> INDEPENDENT CREATIVE STUDIO</div>
+                      <h3>Ideas that<br><em>feel like</em> something.</h3>
+                      <p>We build thoughtful digital experiences for brands with something to say.</p>
+                      <button class="demo-primary">Explore our work <span>↗</span></button>
+                      <div class="demo-stamp">GOOD<br>THINGS<br>TAKE<br>SHAPE <span>✳</span></div>
+                    </section>
+                    <section class="demo-work">
+                      <div class="demo-work-heading"><span>SELECTED WORK</span><span>2024 — 2026 ↘</span></div>
+                      <div class="demo-cards">
+                        <article class="demo-card demo-card-one"><div class="art-shape shape-one"></div><div class="demo-card-meta"><strong>Form & Field</strong><span>Brand identity</span></div></article>
+                        <article class="demo-card demo-card-two"><div class="art-shape shape-two"></div><div class="demo-card-meta"><strong>Slow Sunday</strong><span>Digital experience</span></div></article>
+                      </div>
+                    </section>
+                    <footer class="demo-footer"><span>MADE WITH INTENTION.</span><span>SCROLL TO EXPLORE ↓</span></footer>
+                  </div>
+                </div>
+              </div>
+              <div class="preview-bottom"><span><span class="live-dot"></span> Updates live as you explore</span><button id="open-preview" class="text-action">Open preview ↗</button></div>
+            </section>
+            <div class="preview-insight"><span class="insight-icon">✦</span><div><strong>Good design is a feeling.</strong><p>Try a different direction, then lock the details you love.</p></div></div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="favorites-view" class="view hidden">
+        <div class="page-heading"><div class="eyebrow"><span class="eyebrow-line"></span> YOUR PERSONAL COLLECTION</div><h1>Saved <em>inspiration</em><span class="heading-dot">.</span></h1><p class="intro-copy">Your favorite combinations, ready whenever creativity calls.</p></div>
+        <div id="favorites-list" class="favorites-list"></div>
+      </section>
+
+      <section id="about-view" class="view hidden">
+        <div class="page-heading"><div class="eyebrow"><span class="eyebrow-line"></span> A TOOL FOR CURIOUS CREATORS</div><h1>Make room for<br><em>good ideas.</em></h1><p class="intro-copy">Aesthetic makes the first step of visual design feel a little easier.</p></div>
+        <div class="about-grid">
+          <article class="panel about-card"><span class="about-icon">◈</span><h2>Controlled randomness</h2><p>Explore harmonious color combinations and considered type pairings, without losing the pieces you already love.</p></article>
+          <article class="panel about-card"><span class="about-icon">▤</span><h2>See it in context</h2><p>The live landing-page preview gives you a quick sense of how your palette and typography work together.</p></article>
+          <article class="panel about-card"><span class="about-icon">↗</span><h2>Make it yours</h2><p>Copy values, export CSS variables, and save combinations locally for your next project.</p></article>
+        </div>
+        <div class="about-note"><strong>Made for beginner developers, students, and creative minds.</strong><p>Aesthetic runs entirely in your browser. Favorites are stored on this device; no account or backend needed.</p><button class="primary-button" data-nav="generate">Start exploring ↗</button></div>
+      </section>
+      <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+      <footer class="page-footer"><span>© 2026 Aesthetic Studio</span><span>Make something you love <span class="footer-heart">♥</span></span></footer>
+    </main>
+  </div>
+
+  <dialog id="export-dialog" class="export-dialog">
+    <form method="dialog" class="dialog-head"><div><span class="preview-kicker">READY TO USE</span><h2>Export your aesthetic</h2></div><button class="icon-button" aria-label="Close export dialog">×</button></form>
+    <p class="dialog-copy">Copy these CSS variables into your project to bring your new look with you.</p>
+    <pre><code id="css-output"></code></pre>
+    <div class="dialog-actions"><button class="secondary-button" id="download-css">↓ Download CSS</button><button class="primary-button" id="copy-css">▢ Copy CSS</button></div>
+  </dialog>
+  <dialog id="help-dialog" class="help-dialog">
+    <form method="dialog" class="dialog-head"><div><span class="preview-kicker">A QUICK GUIDE</span><h2>Make it yours</h2></div><button class="icon-button" aria-label="Close help dialog">×</button></form>
+    <ul class="help-list"><li><span>01</span><div><strong>Generate</strong><p>Start with a fresh palette and font pairing.</p></div></li><li><span>02</span><div><strong>Lock what you love</strong><p>Use the lock on individual colors or fonts to keep them while regenerating.</p></div></li><li><span>03</span><div><strong>Try a mood</strong><p>Presets guide the generator toward a specific visual direction.</p></div></li><li><span>04</span><div><strong>Take it with you</strong><p>Copy HEX values, save favorites, or export a CSS file.</p></div></li></ul>
+  </dialog>
+</body>
+</html>
