@@ -117,6 +117,8 @@
     palette: [],
     headingFont: fonts[0],
     bodyFont: fonts[5],
+    paletteOrderByPreset: {},
+    fontOrderByRole: { Heading: [], Body: [] },
     lockedColors: new Set(),
     headingLocked: false,
     bodyLocked: false,
@@ -129,21 +131,46 @@
   const presetNames = Object.keys(paletteSets);
 
   function randomItem(items) { return items[Math.floor(Math.random() * items.length)]; }
+  function shuffled(items) {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
   function normalizeHex(hex) { return /^#[0-9a-f]{6}$/i.test(hex) ? hex.toUpperCase() : "#FFFFFF"; }
   function getPalette(preset, currentPalette = state.palette) {
     const options = paletteSets[preset] || paletteSets.Surprise;
-    // Prefer a different palette on every regeneration so a click never appears to do nothing.
+    const order = state.paletteOrderByPreset[preset] || [];
+    if (!order.length) state.paletteOrderByPreset[preset] = shuffled(options.map((_, index) => index));
+    const nextIndex = state.paletteOrderByPreset[preset].shift();
+    const nextPalette = options[nextIndex];
+    if (!nextPalette) return [...randomItem(options)];
     const currentKey = Array.isArray(currentPalette) ? currentPalette.map(normalizeHex).join(",") : "";
-    const alternatives = options.filter(option => option.map(normalizeHex).join(",") !== currentKey);
-    return [...randomItem(alternatives.length ? alternatives : options)];
+    const nextKey = nextPalette.map(normalizeHex).join(",");
+    if (options.length > 1 && currentKey && currentKey === nextKey) return getPalette(preset, []);
+    return [...nextPalette];
   }
-  function pickFonts() {
-    let headingCandidates = fonts.filter(f => f.role === "Heading");
-    let bodyCandidates = fonts.filter(f => f.role === "Body");
-    let heading = randomItem(headingCandidates);
-    let body = randomItem(bodyCandidates);
-    if (heading.name === body.name) body = fonts.find(f => f.name === "Inter");
-    return {heading, body};
+  function pickNextFont(role, excludeName = "") {
+    const candidates = fonts.filter(font => font.role === role);
+    if (!candidates.length) return null;
+    if (!state.fontOrderByRole[role] || !state.fontOrderByRole[role].length) {
+      state.fontOrderByRole[role] = shuffled(candidates.map(font => font.name));
+    }
+    const skipped = [];
+    let selectedName = null;
+    while (state.fontOrderByRole[role].length) {
+      const name = state.fontOrderByRole[role].shift();
+      if (name !== excludeName || candidates.length === 1) {
+        selectedName = name;
+        break;
+      }
+      skipped.push(name);
+    }
+    state.fontOrderByRole[role].push(...skipped);
+    if (!selectedName) return pickNextFont(role, "");
+    return candidates.find(font => font.name === selectedName) || candidates[0];
   }
   function generateColors() {
     const next = getPalette(state.preset, state.palette);
@@ -154,10 +181,9 @@
     updateSaveButton();
   }
   function generateFonts() {
-    const chosen = pickFonts();
-    if (!state.headingLocked) state.headingFont = chosen.heading;
+    if (!state.headingLocked) state.headingFont = pickNextFont("Heading") || state.headingFont;
     if (!state.bodyLocked) {
-      state.bodyFont = chosen.body.name === state.headingFont.name ? fonts.find(f => f.name === "Inter") : chosen.body;
+      state.bodyFont = pickNextFont("Body", state.headingFont.name) || state.bodyFont;
     }
     renderFonts();
     updatePreview();
@@ -471,7 +497,8 @@
   function init() {
     state.favorites = loadFavorites();
     state.palette = getPalette(state.preset);
-    const initialFonts = pickFonts(); state.headingFont = initialFonts.heading; state.bodyFont = initialFonts.body;
+    state.headingFont = pickNextFont("Heading") || state.headingFont;
+    state.bodyFont = pickNextFont("Body", state.headingFont.name) || state.bodyFont;
     renderPalette(); renderFonts(); updatePreview(); updateContrast(); updateLockButtons(); updateSaveButton();
     $("#favorite-count").textContent = String(state.favorites.length);
 
