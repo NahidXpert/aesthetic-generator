@@ -14,6 +14,16 @@
     --font-body: "Inter", "DM Sans", Arial, sans-serif
 }
 
+:root[data-theme="dark"] {
+    --app-bg: #0b1220;
+    --panel: #111b2d;
+    --text: #e5ecf5;
+    --muted: #9fb0c6;
+    --border: #243247;
+    --soft: #182233;
+    --shadow: 0 14px 34px rgba(2, 8, 22, .5)
+}
+
 * {
     box-sizing: border-box
 }
@@ -346,6 +356,12 @@ button:disabled {
     border-color: #c8bcff;
     color: var(--accent);
     background: #fbfaff
+}
+
+.icon-button[aria-pressed="true"] {
+    border-color: #d4cbff;
+    color: var(--accent);
+    background: #f2efff
 }
 
 .icon-button.small {
@@ -1355,6 +1371,86 @@ kbd {
 
 .footer-heart {
     color: #e6a2b6
+}
+
+:root[data-theme="dark"] .sidebar,
+:root[data-theme="dark"] .icon-button,
+:root[data-theme="dark"] .font-sample,
+:root[data-theme="dark"] .preset-chip,
+:root[data-theme="dark"] .secondary-button,
+:root[data-theme="dark"] .favorite-card,
+:root[data-theme="dark"] .empty-state,
+:root[data-theme="dark"] .browser-frame {
+    background: #121d31
+}
+
+:root[data-theme="dark"] .brand,
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] .breadcrumb strong,
+:root[data-theme="dark"] .font-sample-text,
+:root[data-theme="dark"] .favorite-fonts,
+:root[data-theme="dark"] .panel h2,
+:root[data-theme="dark"] .preview-top h2,
+:root[data-theme="dark"] .dialog-head h2 {
+    color: #e8eef7
+}
+
+:root[data-theme="dark"] .nav-item,
+:root[data-theme="dark"] .preset-link,
+:root[data-theme="dark"] .subtle-button,
+:root[data-theme="dark"] .icon-button,
+:root[data-theme="dark"] .secondary-button,
+:root[data-theme="dark"] .preview-bottom,
+:root[data-theme="dark"] .text-action {
+    color: #b8c5d8
+}
+
+:root[data-theme="dark"] .nav-item:hover,
+:root[data-theme="dark"] .preset-link:hover,
+:root[data-theme="dark"] .icon-button:hover,
+:root[data-theme="dark"] .secondary-button:hover {
+    background: #1a2740
+}
+
+:root[data-theme="dark"] .nav-item.active,
+:root[data-theme="dark"] .preset-chip.active,
+:root[data-theme="dark"] .secondary-button.is-saved {
+    background: #2b2652
+}
+
+:root[data-theme="dark"] .saved-indicator,
+:root[data-theme="dark"] .sidebar-foot,
+:root[data-theme="dark"] .eyebrow,
+:root[data-theme="dark"] .intro-copy,
+:root[data-theme="dark"] .panel-heading p,
+:root[data-theme="dark"] .hint,
+:root[data-theme="dark"] .font-description,
+:root[data-theme="dark"] .preview-kicker,
+:root[data-theme="dark"] .preview-insight p,
+:root[data-theme="dark"] .page-footer,
+:root[data-theme="dark"] .favorite-card-head span {
+    color: #8ea0ba
+}
+
+:root[data-theme="dark"] .section-number,
+:root[data-theme="dark"] .device-switch,
+:root[data-theme="dark"] .preview-stage,
+:root[data-theme="dark"] .browser-bar,
+:root[data-theme="dark"] .browser-address,
+:root[data-theme="dark"] .tip-card,
+:root[data-theme="dark"] .empty-art {
+    background: #18253a
+}
+
+:root[data-theme="dark"] .browser-bar,
+:root[data-theme="dark"] .preview-stage,
+:root[data-theme="dark"] .favorite-actions {
+    border-color: #243247
+}
+
+:root[data-theme="dark"] .palette-footer,
+:root[data-theme="dark"] .font-footer {
+    border-top-color: #243247
 }
 
 .hidden {

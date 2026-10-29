@@ -4,6 +4,7 @@
   const $ = (selector, scope = document) => scope.querySelector(selector);
   const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
   const STORAGE_KEY = "aesthetic-generator-favorites-v1";
+  const THEME_STORAGE_KEY = "aesthetic-generator-theme-v1";
 
   const paletteSets = {
     Surprise: [
@@ -124,7 +125,8 @@
     bodyLocked: false,
     device: "desktop",
     favorites: [],
-    currentView: "generate"
+    currentView: "generate",
+    theme: "light"
   };
 
   const roleNames = ["Canvas","Soft tint","Accent","Secondary","Deep tone","Ink"];
@@ -315,6 +317,35 @@
     $$(".preset-chip").forEach(chip => chip.classList.toggle("active", chip.dataset.preset === state.preset));
     $$(".preset-link").forEach(link => link.classList.toggle("active", link.dataset.preset === state.preset));
   }
+  function loadTheme() {
+    try {
+      return localStorage.getItem(THEME_STORAGE_KEY) === "dark" ? "dark" : "light";
+    } catch (error) {
+      return "light";
+    }
+  }
+  function applyTheme(theme) {
+    const nextTheme = theme === "dark" ? "dark" : "light";
+    const isDark = nextTheme === "dark";
+    state.theme = nextTheme;
+    document.documentElement.dataset.theme = nextTheme;
+    const toggle = $("#theme-toggle");
+    toggle.setAttribute("aria-pressed", String(isDark));
+    toggle.setAttribute("aria-label", isDark ? "Enable light mode" : "Enable dark mode");
+    toggle.title = isDark ? "Switch to light mode" : "Switch to dark mode";
+    toggle.textContent = isDark ? "☀" : "☾";
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) themeColor.content = isDark ? "#0b1220" : "#f8f9fc";
+  }
+  function toggleTheme() {
+    const nextTheme = state.theme === "dark" ? "light" : "dark";
+    applyTheme(nextTheme);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    } catch (error) {
+      toast("Theme changed for this session only.", "info");
+    }
+  }
   function updateSaveButton() {
     const saved = state.favorites.some(f => sameAesthetic(f, currentAesthetic()));
     $("#save-favorite").classList.toggle("is-saved", saved);
@@ -496,6 +527,7 @@
   }
   function init() {
     state.favorites = loadFavorites();
+    applyTheme(loadTheme());
     state.palette = getPalette(state.preset);
     state.headingFont = pickNextFont("Heading") || state.headingFont;
     state.bodyFont = pickNextFont("Body", state.headingFont.name) || state.bodyFont;
@@ -520,6 +552,7 @@
     $("#export-css").addEventListener("click", openExport);
     $("#copy-css").addEventListener("click", () => copyText(cssExport(), "CSS variables copied"));
     $("#download-css").addEventListener("click", downloadCss);
+    $("#theme-toggle").addEventListener("click", toggleTheme);
     $("#help-button").addEventListener("click", () => $("#help-dialog").showModal());
     $("#open-preview").addEventListener("click", () => {
       const blob = new Blob([`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Aesthetic preview</title><link href="https://fonts.googleapis.com/css2?family=${encodeURIComponent(state.headingFont.name).replace(/%20/g,"+")}&family=${encodeURIComponent(state.bodyFont.name).replace(/%20/g,"+")}&display=swap" rel="stylesheet"><style>:root{--p0:${state.palette[0]};--p1:${state.palette[1]};--p2:${state.palette[2]};--p3:${state.palette[3]};--p4:${state.palette[4]};--p5:${state.palette[5]}}body{margin:0;background:var(--p0);color:var(--p5);font-family:'${state.bodyFont.name}',Arial,sans-serif}main{padding:12vh 10vw}h1{font-family:'${state.headingFont.name}',Georgia,serif;font-size:clamp(3rem,8vw,7rem);font-weight:500;line-height:1;margin:1rem 0}h1 em{color:var(--p2)}p{max-width:35rem;line-height:1.8}button{background:var(--p5);color:var(--p0);border:0;border-radius:6px;padding:1rem 1.4rem;font:inherit}.swatches{display:flex;margin-top:4rem}.swatches i{height:70px;flex:1;background:var(--p0)}${state.palette.map((c,i)=>`.swatches i:nth-child(${i+1}){background:${c}}`).join("")}</style></head><body><main><small>INDEPENDENT CREATIVE STUDIO</small><h1>Ideas that<br><em>feel like</em> something.</h1><p>We build thoughtful digital experiences for brands with something to say.</p><button>Explore our work ↗</button><div class="swatches">${state.palette.map(() => "<i></i>").join("")}</div></main></body></html>`], {type:"text/html"});
