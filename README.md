@@ -8,6 +8,7 @@ A polished, responsive static website for exploring harmonious color palettes an
 - **Font pairing generator** with live Google Fonts previews and independent regeneration.
 - **Live landing-page preview** that updates with the selected palette and typography.
 - **Desktop, tablet, and mobile preview modes.**
+- **Theme toggle** with persistent dark mode preference.
 - **Controlled randomness:** lock individual colors, all colors, either font, or both fonts.
 - **Seven preset directions:** Minimal, Pastel, Retro, Dark, Luxury, Nature, and Futuristic, plus Surprise Me.
 - **Copy actions** for individual HEX codes, all palette values, and font names.
